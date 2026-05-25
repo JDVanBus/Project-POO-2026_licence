@@ -1,0 +1,59 @@
+classDiagram
+    class WebScraperController {
+        +URL url
+        +execute()
+        +load_page()
+        +parse_page()
+        +extract_data()
+        +store_data()
+    }
+
+    class HttpClient {
+        +get(url) : Response
+    }
+
+    class HTMLParser {
+        +parse(html) : Document
+    }
+
+    class DataExtractor {
+        +extract(document) : List<ScrapedItem>
+        +filter_by(criteria)
+    }
+
+    class DataStorage {
+        +save(items)
+        +to_dict()
+        +export_csv(path)
+    }
+
+    class Logger {
+        +info(message)
+        +warning(message)
+        +error(message)
+    }
+
+    class Response {
+        +status_code
+        +text
+    }
+
+    class Document {
+        +find(selector)
+        +find_all(selector)
+    }
+
+    class ScrapedItem {
+        +title
+        +price
+        +image_url
+    }
+
+    WebScraperController --> HttpClient : usa
+    WebScraperController --> HTMLParser : usa
+    WebScraperController --> DataExtractor : usa
+    WebScraperController --> DataStorage : usa
+    WebScraperController --> Logger : usa
+    HttpClient --> Response
+    HTMLParser --> Document
+    DataExtractor --> ScrapedItem
