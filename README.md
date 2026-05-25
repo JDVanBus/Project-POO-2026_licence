@@ -81,6 +81,40 @@ Pendientes:
 
 ---
 
+# Primer Borrador UML
+
+```mermaid
+classDiagram
+    direction 
+    class WebScraper {
+    + str name
+    +scrape(url)
+    }
+
+    class RequestHandler {
+    +get(url) String
+    }
+
+    class Parser {
+    +parse(html) List DataModel
+    }
+
+    class DataModel {
+     + dict  data
+     + save_data(parse) 
+    }
+    class Logger{
+    + list : history
+    + notify_error(error : str)
+    }
+
+    WebScraper *-- RequestHandler 
+    RequestHandler *-- Parser
+    WebScraper *-- Parser : 1
+    Parser --> DataModel : create
+    WebScraper ..> Logger : optional
+```
+
 # Referencias
 
 - [Curso básico de Web Scraping](https://github.com/GEJ1/web_scraping_freecodecamp.git)
