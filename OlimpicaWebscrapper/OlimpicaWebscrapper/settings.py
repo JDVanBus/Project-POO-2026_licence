@@ -1,9 +1,9 @@
 # Scrapy settings for OlimpicaWebscrapper project
 
-BOT_NAME = 'OlimpicaWebscrapper'
+BOT_NAME = "OlimpicaWebscrapper"
 
-SPIDER_MODULES = ['OlimpicaWebscrapper.spiders']
-NEWSPIDER_MODULE = 'OlimpicaWebscrapper.spiders'
+SPIDER_MODULES = ["OlimpicaWebscrapper.spiders"]
+NEWSPIDER_MODULE = "OlimpicaWebscrapper.spiders"
 
 # Obedece robots.txt
 ROBOTSTXT_OBEY = False
@@ -13,7 +13,7 @@ DOWNLOAD_DELAY = 2
 RANDOMIZE_DOWNLOAD_DELAY = True
 
 # User-Agent (será sobrescrito por middleware)
-USER_AGENT = 'OlimpicaWebscrapper (+http://www.you-website.com)'
+USER_AGENT = "OlimpicaWebscrapper (+http://www.you-website.com)"
 
 # # Habilitar middleware
 # DOWNLOADER_MIDDLEWARES = {
@@ -26,8 +26,8 @@ USER_AGENT = 'OlimpicaWebscrapper (+http://www.you-website.com)'
 # }
 
 # Logging
-LOG_LEVEL = 'INFO'
-LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+LOG_LEVEL = "INFO"
+LOG_FORMAT = "%(asctime)s [%(name)s] %(levelname)s: %(message)s"
 
 # Memory usage limits
 MEMDEBUG_ENABLED = False

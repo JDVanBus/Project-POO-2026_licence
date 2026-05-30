@@ -1,6 +1,7 @@
 import scrapy
 import json
 
+
 class OlimpicaSpider(scrapy.Spider):
     name = "OlimpicaSpider"
     allowed_domains = ["olimpica.com"]
@@ -9,7 +10,4 @@ class OlimpicaSpider(scrapy.Spider):
     def parse(self, response):
         categories = json.loads(response.text)
         for cat in categories:
-            yield {
-                'name': cat['name'],
-                'url': cat['url']
-            }
+            yield {"name": cat["name"], "url": cat["url"]}
