@@ -55,6 +55,19 @@ El sistema seguirá tres etapas principales:
 
 ---
 
+## Datos a Extraer
+
+Actualmente se está evaluando qué tipo de información será procesada por el sistema.
+
+Algunas posibilidades incluyen:
+
+- Productos y precios
+- Noticias
+- Ofertas laborales
+- Información académica
+
+La fuente definitiva se definirá durante la fase de diseño.
+
 # Programación Orientada a Objetos
 
 El proyecto será desarrollado siguiendo los principios fundamentales de POO:
@@ -109,7 +122,6 @@ classDiagram
     }
 
     WebScraper *-- RequestHandler 
-    RequestHandler *-- Parser
     WebScraper *-- Parser : 1
     Parser --> DataModel : create
     WebScraper ..> Logger : optional
