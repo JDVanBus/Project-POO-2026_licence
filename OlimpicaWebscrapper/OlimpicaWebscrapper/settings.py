@@ -21,9 +21,9 @@ USER_AGENT = "OlimpicaWebscrapper (+http://www.you-website.com)"
 # }
 
 # Habilitar pipelines
-# ITEM_PIPELINES = {
-#     'OlimpicaWebscrapper.pipelines.OlimpicaProductPipeline': 300,
-# }
+ITEM_PIPELINES = {
+	"OlimpicaWebscrapper.pipelines.OlimpicaProductPipeline": 300,
+}
 
 # Logging
 LOG_LEVEL = "INFO"
