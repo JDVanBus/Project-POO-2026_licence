@@ -66,7 +66,7 @@ Algunas posibilidades incluyen:
 - Ofertas laborales
 - Información académica
 
-La fuente definitiva será definida durante la fase de diseño.
+La fuente definitiva se definirá durante la fase de diseño.
 
 # Programación Orientada a Objetos
 
