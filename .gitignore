@@ -24,6 +24,7 @@ build/
 # Específico del proyecto
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
 .coverage
 
 *.json

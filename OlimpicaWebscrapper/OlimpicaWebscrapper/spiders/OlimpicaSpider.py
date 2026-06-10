@@ -24,10 +24,12 @@ class OlimpicaSpider(scrapy.Spider):
             if dedup_key in self.seen_categories:
                 children = category.get("children") or []
                 if children:
-                    yield from self.parse_categories(children, parent=category, level=level + 1)
+                    yield from self.parse_categories(
+                        children, parent=category, level=level + 1
+                    )
                 continue
 
-            self.seen_categories.add(dedup_key)  
+            self.seen_categories.add(dedup_key)
 
             item = OlimpicaItem()
             item["source"] = "olimpica.com"
@@ -45,8 +47,9 @@ class OlimpicaSpider(scrapy.Spider):
 
             children = category.get("children") or []
             if children:
-                yield from self.parse_categories(children, parent=category, level = level + 1)
-  
+                yield from self.parse_categories(
+                    children, parent=category, level=level + 1
+                )
 
     def build_breadcrumbs(self, category, parent=None):
         breadcrumbs = []
