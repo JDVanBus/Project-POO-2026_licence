@@ -1,6 +1,3 @@
-import json
-
-
 class OlimpicaProductPipeline:
     def open_spider(self, spider):
         self._items = []
@@ -34,8 +31,8 @@ class OlimpicaProductPipeline:
 
         # Persist tuple to disk: pickle (preserves tuple) and JSON (readable)
 
-        with open("categorias_tuple.json", "w", encoding="utf8") as f:
-            json.dump(list(items_tuple), f, ensure_ascii=False, indent=2)
+        # with open("categorias_tuple.json", "w", encoding="utf8") as f:
+        #     json.dump(list(items_tuple), f, ensure_ascii=False, indent=2)
 
         # also keep reference in the pipeline instance
         self.items_tuple = items_tuple

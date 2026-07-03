@@ -2,8 +2,8 @@
 
 BOT_NAME = "OlimpicaWebscrapper"
 
-SPIDER_MODULES = ["OlimpicaWebscrapper.spiders"]
-NEWSPIDER_MODULE = "OlimpicaWebscrapper.spiders"
+SPIDER_MODULES = ["OlimpicaWebscrapper.OlimpicaWebscrapper.spiders"]
+NEWSPIDER_MODULE = "OlimpicaWebscrapper.OlimpicaWebscrapper.spiders"
 
 # Obedece robots.txt
 ROBOTSTXT_OBEY = False
@@ -22,7 +22,7 @@ USER_AGENT = "OlimpicaWebscrapper (+http://www.you-website.com)"
 
 # Habilitar pipelines
 ITEM_PIPELINES = {
-    "OlimpicaWebscrapper.pipelines.OlimpicaProductPipeline": 300,
+    "OlimpicaWebscrapper.OlimpicaWebscrapper.pipelines.OlimpicaProductPipeline": 300,
 }
 
 # Logging
@@ -37,3 +37,11 @@ TELNETCONSOLE_ENABLED = False
 DOWNLOAD_TIMEOUT = 10
 
 FEED_EXPORT_ENCODING = "utf-8"
+# FEEDS = {
+#     "items.json": {
+#         "format": "json",
+#         "encoding": "utf-8",
+#         "indent": 2,
+#         "overwrite": True,
+#     }
+# }
