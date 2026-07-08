@@ -2,8 +2,8 @@
 
 BOT_NAME = "OlimpicaWebscrapper"
 
-SPIDER_MODULES = ["OlimpicaWebscrapper.OlimpicaWebscrapper.spiders"]
-NEWSPIDER_MODULE = "OlimpicaWebscrapper.OlimpicaWebscrapper.spiders"
+SPIDER_MODULES = ["OlimpicaWebscrapper.Structure.spiders"]
+NEWSPIDER_MODULE = "OlimpicaWebscrapper.Structure.spiders"
 
 # Obedece robots.txt
 ROBOTSTXT_OBEY = False
@@ -22,7 +22,7 @@ USER_AGENT = "OlimpicaWebscrapper (+http://www.you-website.com)"
 
 # Habilitar pipelines
 ITEM_PIPELINES = {
-    "OlimpicaWebscrapper.OlimpicaWebscrapper.pipelines.OlimpicaProductPipeline": 300,
+    "OlimpicaWebscrapper.Structure.pipelines.OlimpicaProductPipeline": 300,
 }
 
 # Logging
