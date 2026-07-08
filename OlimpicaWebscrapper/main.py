@@ -64,11 +64,18 @@ def main():
         category_name = input("Ingresa el nombre de la categoría: ").strip()
         category_url = load_category_url(category_id, category_name)
         output_name = f"products_{sanitize_filename(category_id)}_{sanitize_filename(category_name)}.json"
-
+        slug = category_name.lower().replace(" ", "-")
+        max_sections = input(
+            "Digite la cantidad de secciones máxima a scrapear (5 por defecto): "
+        )
+        if not category_name and not category_url:
+            raise ValueError("Se requiere un name o un category_url para continuar")
         kwargs = {
             "category_id": category_id,
             "category_name": category_name,
             "output": output_name,
+            "category_slug": slug,
+            "max_sections": max_sections,
         }
         if category_url:
             kwargs["category_url"] = category_url

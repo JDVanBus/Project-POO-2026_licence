@@ -13,13 +13,25 @@ class ProductSpider(scrapy.Spider):
     allowed_domains = ["olimpica.com"]
 
     def __init__(
-        self, category_id=None, category_name=None, category_url=None, *args, **kwargs
+        self,
+        category_id=None,
+        category_name=None,
+        category_url=None,
+        category_slug=None,
+        max_sections=5,
+        *args,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.category_id = category_id
         self.category_name = category_name
         self.category_url = category_url
+        self.category_slug = category_slug
         self.page_size = 50
+        try:
+            self.max_sections = max(1, int(max_sections))
+        except (TypeError, ValueError):
+            self.max_sections = 5
         self.headers = {
             "Accept": "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -46,11 +58,11 @@ class ProductSpider(scrapy.Spider):
                 url=url,
                 headers=self.headers,
                 callback=self.parse,
-                cb_kwargs={"start_idx": 0},
+                cb_kwargs={"start_idx": 0, "section_number": 0},
                 dont_filter=True,
             )
 
-    def parse(self, response, start_idx=0):
+    def parse(self, response, start_idx=0, section_number=0):
         self.logger.info("Procesando %s", response.url)
         products = None
 
@@ -99,16 +111,32 @@ class ProductSpider(scrapy.Spider):
                 },
             )
 
-        # if isinstance(products, list) and len(products) >= self.page_size:
-        #     next_start = start_idx + self.page_size
-        #     next_url = self._build_category_api_url(next_start)
-        #     yield scrapy.Request(
-        #         url=next_url,
-        #         headers=self.headers,
-        #         callback=self.parse,
-        #         cb_kwargs={"start_idx": next_start},
-        #         dont_filter=True,
-        #     )
+        if isinstance(products, list) and len(products) >= self.page_size:
+            if section_number + 1 < self.max_sections:
+                next_start = start_idx + self.page_size
+                next_url = self._build_category_api_url(next_start)
+                self.logger.info(
+                    "Continuando a la siguiente sección %s/%s para %s",
+                    section_number + 2,
+                    self.max_sections,
+                    response.url,
+                )
+                yield scrapy.Request(
+                    url=next_url,
+                    headers=self.headers,
+                    callback=self.parse,
+                    cb_kwargs={
+                        "start_idx": next_start,
+                        "section_number": section_number + 1,
+                    },
+                    dont_filter=True,
+                )
+            else:
+                self.logger.info(
+                    "Se alcanzó el límite de %s secciones para %s",
+                    self.max_sections,
+                    response.url,
+                )
 
     def parse_products(self, response):
         text = response.text
@@ -231,10 +259,10 @@ class ProductSpider(scrapy.Spider):
             else:
                 path = self.category_url
         elif self.category_name:
-            slug = self._slugify(self.category_name)
+            slug = self.category_slug or self._slugify(self.category_name)
             path = f"/{slug}" if slug else ""
         else:
-            path = ""
+            return ""
 
         return f"https://www.olimpica.com/api/catalog_system/pub/products/search{path}?{urllib.parse.urlencode({'_from': start_idx, '_to': start_idx + self.page_size - 1})}"
 
