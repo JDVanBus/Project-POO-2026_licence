@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -50,10 +51,13 @@ def run_scrapy(spider_name, **kwargs):
     subprocess.run(command, cwd=str(ROOT), check=True)
 
 
-def main():
-    print("Menú del scraper")
+def menu():
+    print("=" * 20)
+    print("OLIMPICA-WEBSCRAPPER")
+    print("=" * 20)
     print("1. Extraer categorías")
     print("2. Extraer productos por categoría")
+    print("3. Listar Categorias")
 
     choice = input("Elige una opción: ").strip()
 
@@ -82,8 +86,48 @@ def main():
 
         run_scrapy("ProductSpider", **kwargs)
         print(f"Archivo guardado en: {output_name}")
+    elif choice == "3":
+        if not CATEGORIES_FILE.exists():
+            print(
+                "No se encontró el archivo de categorías. Por favor, extrae las categorías primero."
+            )
+            return
+
+        try:
+            with CATEGORIES_FILE.open("r", encoding="utf-8") as handle:
+                data = json.load(handle)
+        except Exception as e:
+            print(f"Error al leer el archivo de categorías: {e}")
+            return
+
+        if not data:
+            print("No hay categorías disponibles.")
+            return
+
+        print("\nCategorías disponibles:")
+        print("-" * 30)
+        for i, category in enumerate(data):
+            if i % 40 == 0 and i > 0:
+                time.sleep(1)
+
+            category_id = category.get("id", "N/A")
+            category_name = category.get("name", "N/A")
+            print(f"ID: {category_id}, Nombre: {category_name}")
+
     else:
         print("Opción no válida")
+
+
+def main():
+    flag = True
+    while flag:
+        menu()
+        out = input("¿Desea realizar otra operación? (s/n): ").strip().lower()
+
+        if out == "n":
+            break
+        else:
+            continue
 
 
 if __name__ == "__main__":
