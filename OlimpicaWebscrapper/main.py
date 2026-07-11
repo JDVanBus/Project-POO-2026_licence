@@ -120,7 +120,12 @@ def menu():
     elif choice == "5":
         category_url = input("Ingresa la URL de la categoría de Falabella: ").strip()
         category_name = input("Ingresa el nombre de la categoría: ").strip()
-        max_pages = input("Ingresa el número máximo de páginas a scrapear (3 por defecto): ").strip() or "3"
+        max_pages = (
+            input(
+                "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
+            ).strip()
+            or "3"
+        )
         output_name = f"products_falabella_{sanitize_filename(category_name)}.json"
         run_scrapy(
             "FalabellaProductSpider",
