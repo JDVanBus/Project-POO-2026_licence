@@ -16,9 +16,10 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 USER_AGENT = "OlimpicaWebscrapper (+http://www.you-website.com)"
 
 # # Habilitar middleware
-# DOWNLOADER_MIDDLEWARES = {
-#     'OlimpicaWebscrapper.middlewares.OlimpicawebscrapperDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "OlimpicaWebscrapper.Structure.middlewares.OlimpicaMiddleware": 400,
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+}
 
 # Habilitar pipelines
 ITEM_PIPELINES = {

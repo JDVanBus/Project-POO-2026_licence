@@ -58,6 +58,8 @@ def menu():
     print("1. Extraer categorías")
     print("2. Extraer productos por categoría")
     print("3. Listar Categorias")
+    print("4. Extraer categorías de Falabella")
+    print("5. Extraer productos de Falabella")
 
     choice = input("Elige una opción: ").strip()
 
@@ -113,7 +115,21 @@ def menu():
             category_id = category.get("id", "N/A")
             category_name = category.get("name", "N/A")
             print(f"ID: {category_id}, Nombre: {category_name}")
-
+    elif choice == "4":
+        run_scrapy("FalabellaCategorySpider", output="falabella_categorias.json")
+    elif choice == "5":
+        category_url = input("Ingresa la URL de la categoría de Falabella: ").strip()
+        category_name = input("Ingresa el nombre de la categoría: ").strip()
+        max_pages = input("Ingresa el número máximo de páginas a scrapear (3 por defecto): ").strip() or "3"
+        output_name = f"products_falabella_{sanitize_filename(category_name)}.json"
+        run_scrapy(
+            "FalabellaProductSpider",
+            category_url=category_url,
+            category_name=category_name,
+            max_pages=max_pages,
+            output=output_name,
+        )
+        print(f"Archivo guardado en: {output_name}")
     else:
         print("Opción no válida")
 
@@ -124,10 +140,10 @@ def main():
         menu()
         out = input("¿Desea realizar otra operación? (s/n): ").strip().lower()
 
-        if out == "n":
-            break
-        else:
+        if out == "s":
             continue
+        else:
+            break
 
 
 if __name__ == "__main__":
