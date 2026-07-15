@@ -4,7 +4,7 @@ from ..items import CategoryItem
 
 
 class CategorySpider(scrapy.Spider):
-    name = "CategorySpider"
+    name = "OlimpicaCategorySpider"
     allowed_domains = ["olimpica.com"]
     start_urls = ["https://olimpica.com/api/catalog_system/pub/category/tree/1"]
 

@@ -55,21 +55,23 @@ def menu():
     print("=" * 20)
     print("OLIMPICA-WEBSCRAPPER")
     print("=" * 20)
-    print("1. Extraer categorías")
-    print("2. Extraer productos por categoría")
+    print("1. Extraer categorías de Olimpica")
+    print("2. Extraer productos de Olimpica")
     print("3. Listar Categorias")
     print("4. Extraer categorías de Falabella")
     print("5. Extraer productos de Falabella")
+    print("6. Extraer categorias de Linio")
+    print("7. Extraer productos de Linio")
 
     choice = input("Elige una opción: ").strip()
 
     if choice == "1":
-        run_scrapy("CategorySpider", output="categorias.json")
+        run_scrapy("OlimpicaCategorySpider", output="Olimpica_categorias.json")
     elif choice == "2":
         category_id = input("Ingresa el ID de la categoría: ").strip()
         category_name = input("Ingresa el nombre de la categoría: ").strip()
         category_url = load_category_url(category_id, category_name)
-        output_name = f"products_{sanitize_filename(category_id)}_{sanitize_filename(category_name)}.json"
+        output_name = f"productos_Olimpica{sanitize_filename(category_id)}_{sanitize_filename(category_name)}.json"
         slug = category_name.lower().replace(" ", "-")
         max_sections = input(
             "Digite la cantidad de secciones máxima a scrapear (5 por defecto): "
@@ -86,7 +88,7 @@ def menu():
         if category_url:
             kwargs["category_url"] = category_url
 
-        run_scrapy("ProductSpider", **kwargs)
+        run_scrapy("OlimpicaProductSpider", **kwargs)
         print(f"Archivo guardado en: {output_name}")
     elif choice == "3":
         if not CATEGORIES_FILE.exists():
@@ -117,6 +119,7 @@ def menu():
             print(f"ID: {category_id}, Nombre: {category_name}")
     elif choice == "4":
         run_scrapy("FalabellaCategorySpider", output="falabella_categorias.json")
+
     elif choice == "5":
         category_url = input("Ingresa la URL de la categoría de Falabella: ").strip()
         category_name = input("Ingresa el nombre de la categoría: ").strip()
@@ -126,13 +129,40 @@ def menu():
             ).strip()
             or "3"
         )
-        output_name = f"products_falabella_{sanitize_filename(category_name)}.json"
+        output_name = f"productos_falabella_{sanitize_filename(category_name)}.json"
         run_scrapy(
             "FalabellaProductSpider",
             category_url=category_url,
             category_name=category_name,
             max_pages=max_pages,
             output=output_name,
+        )
+        print(f"Archivo guardado en: {output_name}")
+
+    elif choice == "6":
+        run_scrapy("LinioCategorySpider", output="linio_categorias.json")
+
+    elif choice == "7":
+        # Guardamos el dato directamente en 'category_id' para que coincida con el Spider
+        category_id = input(
+            "Ingresa el id de la categoría de Linio (ej: CATG33244): "
+        ).strip()
+        category_name = input("Ingresa el nombre de la categoría: ").strip()
+        max_pages = (
+            input(
+                "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
+            ).strip()
+            or "3"
+        )
+        output_name = f"productos_linio_{sanitize_filename(category_name)}.json"
+
+        # Ejecutamos pasando 'category_id' (en lugar de category_url) y 'output' (en lugar de output_name)
+        run_scrapy(
+            "LinioProductSpider",
+            category_id=category_id,
+            category_name=category_name,
+            max_pages=max_pages,
+            output=output_name,  # Cambiado a 'output' para que run_scrapy lo detecte
         )
         print(f"Archivo guardado en: {output_name}")
     else:
