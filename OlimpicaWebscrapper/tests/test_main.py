@@ -27,6 +27,7 @@ from main import sanitize_filename, load_category_url, run_scrapy, menu
 # sanitize_filename
 # ---------------------------------------------------------------------------
 
+
 class TestSanitizeFilename:
     def test_removes_invalid_characters(self):
         result = sanitize_filename('Ropa/Zapatos: "Nike"')
@@ -60,6 +61,7 @@ class TestSanitizeFilename:
 # ---------------------------------------------------------------------------
 # load_category_url
 # ---------------------------------------------------------------------------
+
 
 class TestLoadCategoryUrl:
     def test_returns_none_when_file_missing(self, tmp_path, monkeypatch):
@@ -100,9 +102,7 @@ class TestLoadCategoryUrl:
     def test_returns_url_unchanged_when_already_absolute(self, tmp_path, monkeypatch):
         fake_file = tmp_path / "categorias.json"
         fake_file.write_text(
-            json.dumps(
-                [{"id": "1", "name": "X", "url": "https://otrodominio.com/x"}]
-            ),
+            json.dumps([{"id": "1", "name": "X", "url": "https://otrodominio.com/x"}]),
             encoding="utf-8",
         )
         monkeypatch.setattr(main, "CATEGORIES_FILE", fake_file)
@@ -145,6 +145,7 @@ class TestLoadCategoryUrl:
 # ---------------------------------------------------------------------------
 # run_scrapy
 # ---------------------------------------------------------------------------
+
 
 class TestRunScrapy:
     def test_builds_basic_command(self, monkeypatch):
@@ -213,6 +214,7 @@ class TestRunScrapy:
 # ---------------------------------------------------------------------------
 # menu (flujo interactivo, con input/run_scrapy mockeados)
 # ---------------------------------------------------------------------------
+
 
 class TestMenu:
     def _mock_inputs(self, monkeypatch, respuestas):
