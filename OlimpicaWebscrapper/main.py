@@ -5,7 +5,12 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CATEGORIES_FILE = ROOT / "categorias.json"
+CATEGORY_FILES = {
+    "1": ("Olimpica", ROOT / "Olimpica_categorias.json"),
+    "2": ("Falabella", ROOT / "falabella_categorias.json"),
+    "3": ("Linio", ROOT / "linio_categorias.json"),
+}
+CATEGORIES_FILE = ROOT / "Olimpica_categorias.json"
 
 
 def sanitize_filename(value):
@@ -21,8 +26,8 @@ def load_category_url(category_id, category_name):
     try:
         with CATEGORIES_FILE.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
-    except Exception:
-        return None
+    except Exception as e:
+        return e
 
     for category in data:
         if str(category.get("id")) == str(category_id):
@@ -91,32 +96,7 @@ def menu():
         run_scrapy("OlimpicaProductSpider", **kwargs)
         print(f"Archivo guardado en: {output_name}")
     elif choice == "3":
-        if not CATEGORIES_FILE.exists():
-            print(
-                "No se encontró el archivo de categorías. Por favor, extrae las categorías primero."
-            )
-            return
-
-        try:
-            with CATEGORIES_FILE.open("r", encoding="utf-8") as handle:
-                data = json.load(handle)
-        except Exception as e:
-            print(f"Error al leer el archivo de categorías: {e}")
-            return
-
-        if not data:
-            print("No hay categorías disponibles.")
-            return
-
-        print("\nCategorías disponibles:")
-        print("-" * 30)
-        for i, category in enumerate(data):
-            if i % 40 == 0 and i > 0:
-                time.sleep(1)
-
-            category_id = category.get("id", "N/A")
-            category_name = category.get("name", "N/A")
-            print(f"ID: {category_id}, Nombre: {category_name}")
+        listar_categorias()
     elif choice == "4":
         run_scrapy("FalabellaCategorySpider", output="falabella_categorias.json")
 
@@ -167,6 +147,45 @@ def menu():
         print(f"Archivo guardado en: {output_name}")
     else:
         print("Opción no válida")
+
+
+def listar_categorias():
+    print("\n¿De cuál plataforma quieres ver las categorías?")
+    for key, (nombre, _) in CATEGORY_FILES.items():
+        print(f"{key}. {nombre}")
+    sub_choice = input("Elige una opción: ").strip()
+
+    if sub_choice not in CATEGORY_FILES:
+        print("Opción no válida")
+        return
+
+    nombre, file_path = CATEGORY_FILES[sub_choice]
+
+    if not file_path.exists():
+        print(
+            f"No se encontró el archivo de categorías de {nombre}. Extráelas primero."
+        )
+        return
+
+    try:
+        with file_path.open("r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception as e:
+        print(f"Error al leer el archivo de categorias: {e}")
+        return
+
+    if not data:
+        print("No hay categorías disponibles.")
+        return
+
+    print(f"\nCategorías disponibles ({nombre}):")
+    print("-" * 30)
+    for i, category in enumerate(data):
+        if i % 40 == 0 and i > 0:
+            time.sleep(1)
+        category_id = category.get("id", "N/A")
+        category_name = category.get("name", "N/A")
+        print(f"ID: {category_id}, Nombre: {category_name}")
 
 
 def main():
