@@ -33,9 +33,6 @@ def load_category_url(category_id, source):
         print(f"ERROR AL LEER: {e}")
         return
 
-    print("Buscando en:", categories_file.resolve())
-    print("IDs encontrados:", [c.get("id") for c in data])
-
     for category in data:
         if str(category.get("id")) == str(category_id):
             url = (category.get("url") or "").strip()
@@ -218,7 +215,6 @@ def menu():
 
     else:
         print("Opción no válida")
-
 
 def main():
     flag = True
