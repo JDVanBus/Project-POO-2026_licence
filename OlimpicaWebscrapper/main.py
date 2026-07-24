@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OLIMPICA_CATEGORIES_FILE = ROOT / "Olimpica_categorias.json"
 FALABELLA_CATEGORIES_FILE = ROOT / "Falabella_categorias.json"
 
+
 def sanitize_filename(value):
     invalid_chars = '<>:"/\\|?*'
     clean_value = "".join("_" if ch in invalid_chars else ch for ch in value)
@@ -19,29 +20,29 @@ def load_category_url(category_id, source):
         categories_file = OLIMPICA_CATEGORIES_FILE
     elif source == "falabella":
         categories_file = FALABELLA_CATEGORIES_FILE
-    else :
+    else:
         return None
-    
+
     if not categories_file.exists():
         return None
-        
+
     try:
         with categories_file.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
     except Exception as e:
         print(f"ERROR AL LEER: {e}")
         return
-    
+
     print("Buscando en:", categories_file.resolve())
     print("IDs encontrados:", [c.get("id") for c in data])
-    
+
     for category in data:
         if str(category.get("id")) == str(category_id):
             url = (category.get("url") or "").strip()
             if not url:
                 continue
             if url.startswith("http"):
-                    return url
+                return url
             if source == "olimpica":
                 return f"https://www.olimpica.com{url if url.startswith('/') else '/' + url}"
 
@@ -80,7 +81,7 @@ def menu():
 
     if choice == "1":
         run_scrapy("OlimpicaCategorySpider", output="Olimpica_categorias.json")
-    
+
     elif choice == "2":
         category_id = input("Ingresa el ID de la categoría: ").strip()
         category_name = input("Ingresa el nombre de la categoría: ").strip()
@@ -104,79 +105,82 @@ def menu():
 
         run_scrapy("OlimpicaProductSpider", **kwargs)
         print(f"Archivo guardado en: {output_name}")
-    
-    elif choice == "3":
-            max_cat = input("Ingresa el número máximo de categorias a scapear: (sin limite por defecto): ").strip()
-            kwargs= {"output": "Falabella_categorias.json" }
-            if max_cat:
-                kwargs["max_categories"] = max_cat
 
-            run_scrapy("FalabellaCategorySpider", **kwargs)
+    elif choice == "3":
+        max_cat = input(
+            "Ingresa el número máximo de categorias a scapear: (sin limite por defecto): "
+        ).strip()
+        kwargs = {"output": "Falabella_categorias.json"}
+        if max_cat:
+            kwargs["max_categories"] = max_cat
+
+        run_scrapy("FalabellaCategorySpider", **kwargs)
 
     elif choice == "4":
-            category_id = input("Ingresa el ID de la categoria: ").strip()
-            category_name = input("Ingresa el nombre de la categoría: ").strip()
-            category_url = load_category_url(category_id, source = "falabella")
-            max_sections = (
-                input(
-                    "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
-                ).strip()
-                or "3"
-            )
-            output_name = f"productos_falabella_{sanitize_filename(category_name)}.json"
-        
-            if not category_name or not category_url:
-                        raise ValueError("Se requiere un name o un category_url para continuar")
-            kwargs = {
-                "category_url" : category_url,
-                "category_name" : category_name,
-                "output" : output_name,
-                "paginas_maximas" : max_sections
-            }
-            run_scrapy("FalabellaProductSpider",**kwargs)
-            print(f"Archivo guardado en: {output_name}")
-    
-    elif choice == "5":        
-            max_cat = input("Ingresa el número máximo de categorias a scapear: (sin limite por defecto): ").strip()
-            kwargs= {"output": "linio_categorias.json" }
-            if max_cat:
-                kwargs["max_categories"] = max_cat
-            run_scrapy("LinioCategorySpider", **kwargs)
-    
-    elif choice == "6":
-            category_id = input(
-                "Ingresa el id de la categoría de Linio (ej: CATG33244): "
+        category_id = input("Ingresa el ID de la categoria: ").strip()
+        category_name = input("Ingresa el nombre de la categoría: ").strip()
+        category_url = load_category_url(category_id, source="falabella")
+        max_sections = (
+            input(
+                "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
             ).strip()
-            category_name = input("Ingresa el nombre de la categoría: ").strip()
-            max_sections = (
-                input(
-                    "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
-                ).strip()
-                or "3"
-            )
-            output_name = f"productos_linio_{sanitize_filename(category_name)}.json"
-            kwargs = {
-                "category_id" : category_id,
-                "category_name" : category_name,
-                "max_pages" : max_sections,
-                "output" : output_name
-            }
-            # Ejecutamos pasando 'category_id' (en lugar de category_url) y 'output' (en lugar de output_name)
-            run_scrapy(
-                "LinioProductSpider", **kwargs)
-            print(f"Archivo guardado en: {output_name}")
-        
+            or "3"
+        )
+        output_name = f"productos_falabella_{sanitize_filename(category_name)}.json"
+
+        if not category_name or not category_url:
+            raise ValueError("Se requiere un name o un category_url para continuar")
+        kwargs = {
+            "category_url": category_url,
+            "category_name": category_name,
+            "output": output_name,
+            "paginas_maximas": max_sections,
+        }
+        run_scrapy("FalabellaProductSpider", **kwargs)
+        print(f"Archivo guardado en: {output_name}")
+
+    elif choice == "5":
+        max_cat = input(
+            "Ingresa el número máximo de categorias a scapear: (sin limite por defecto): "
+        ).strip()
+        kwargs = {"output": "linio_categorias.json"}
+        if max_cat:
+            kwargs["max_categories"] = max_cat
+        run_scrapy("LinioCategorySpider", **kwargs)
+
+    elif choice == "6":
+        category_id = input(
+            "Ingresa el id de la categoría de Linio (ej: CATG33244): "
+        ).strip()
+        category_name = input("Ingresa el nombre de la categoría: ").strip()
+        max_sections = (
+            input(
+                "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
+            ).strip()
+            or "3"
+        )
+        output_name = f"productos_linio_{sanitize_filename(category_name)}.json"
+        kwargs = {
+            "category_id": category_id,
+            "category_name": category_name,
+            "max_pages": max_sections,
+            "output": output_name,
+        }
+        # Ejecutamos pasando 'category_id' (en lugar de category_url) y 'output' (en lugar de output_name)
+        run_scrapy("LinioProductSpider", **kwargs)
+        print(f"Archivo guardado en: {output_name}")
+
     elif choice == "7":
         print("\n¿De cuál plataforma quieres ver las categorias?")
         print("1. Olimpica")
         print("2. Fallabela")
         print("3. Linio")
         cat = input("Elige una opción: ").strip()
-        
+
         if cat == "1":
             categories_file = OLIMPICA_CATEGORIES_FILE
             nombre = "Olimpica"
-        
+
         elif cat == "2":
             categories_file = FALABELLA_CATEGORIES_FILE
             nombre = "Fallabela"
@@ -184,17 +188,19 @@ def menu():
         elif cat == "3":
             categories_file = ROOT / "linio_categorias.json"
             nombre = "Linio"
-        else : 
-            print ("opcion no válida")
-            return 
-          
+        else:
+            print("opcion no válida")
+            return
+
         if not categories_file.exists():
-            print(f"No se encontró el archivo de categorías de {nombre}. Extráelas primero.")
+            print(
+                f"No se encontró el archivo de categorías de {nombre}. Extráelas primero."
+            )
             return
 
         try:
             with categories_file.open("r", encoding="utf-8") as handle:
-                 data = json.load(handle)
+                data = json.load(handle)
 
         except Exception as e:
             print(f"Error al leer las categorias: {e}")
@@ -209,7 +215,7 @@ def menu():
             category_id = category.get("id", "N/A")
             category_name = category.get("name", "N/A")
             print(f"ID: {category_id}, Nombre: {category_name}")
-    
+
     else:
         print("Opción no válida")
 

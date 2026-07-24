@@ -63,7 +63,7 @@ class LinioCategorySpider(scrapy.Spider):
                     # Evitamos duplicados y URLs de paginación o filtros
                     if "?" not in absolute_url and "#" not in absolute_url:
                         category_urls.add(absolute_url)
-            category_urls = list(category_urls)            
+            category_urls = list(category_urls)
             if self.max_categories:
                 category_urls = category_urls[: self.max_categories]
 
