@@ -19,19 +19,24 @@ except Exception:
 class FalabellaCategorySpider(SitemapSpider):
     name = "FalabellaCategorySpider"
     allowed_domains = ["falabella.com.co", "www.falabella.com.co"]
-
-    # 1. Apuntamos directamente al sitemap de categorías que encontraste
     sitemap_urls = [
         "https://www.falabella.com.co/static/site/sitemaps/categories/categories_co_FA_COM-0.xml"
     ]
-
-    # Filtro opcional: Solo procesar URLs que contengan /category/
     sitemap_rules = [
         ("/category/", "parse_category"),
     ]
-
+    
+    def __init__(self, max_categories=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            self.max_categories = int(max_categories) if max_categories else None
+        except (TypeError, ValueError):
+            self.max_categories = None
+        self.processed_count = 0
+    
     def parse_category(self, response):
-        # 2. Extraemos el __NEXT_DATA__ de la página de la categoría actual
+        if self.max_categories and self.processed_count >= self.max_categories:
+            return 
         match = re.search(
             r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
             response.text,
@@ -112,4 +117,5 @@ class FalabellaCategorySpider(SitemapSpider):
         item["level"] = level
         item["breadcrumbs"] = breadcrumbs_list
 
+        self.processed_count +=1
         yield item

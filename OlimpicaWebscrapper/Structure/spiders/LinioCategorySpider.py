@@ -35,6 +35,13 @@ class LinioCategorySpider(scrapy.Spider):
         "CONCURRENT_REQUESTS": 8,
     }
 
+    def __init__(self, max_categories=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            self.max_categories = int(max_categories) if max_categories else None
+        except (TypeError, ValueError):
+            self.max_categories = None
+
     def parse(self, response):
         # Si estamos en la página principal, buscamos todos los enlaces de categorías
         if (
@@ -56,9 +63,12 @@ class LinioCategorySpider(scrapy.Spider):
                     # Evitamos duplicados y URLs de paginación o filtros
                     if "?" not in absolute_url and "#" not in absolute_url:
                         category_urls.add(absolute_url)
+            category_urls = list(category_urls)            
+            if self.max_categories:
+                category_urls = category_urls[: self.max_categories]
 
             self.logger.info(
-                f"Se descubrieron {len(category_urls)} URLs de categorías únicas en el menú."
+                f"Se descubrieron {len(category_urls)} categorías únicas (limite: {self.max_categories or 'sin limite'})."
             )
 
             # Enviamos cada una de las categorías descubiertas al método parse_category
