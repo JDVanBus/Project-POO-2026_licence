@@ -1,9 +1,9 @@
 # Scrapy settings for OlimpicaWebscrapper project
 
-BOT_NAME = "OlimpicaWebscrapper"
+BOT_NAME = "3m_Webscrapper"
 
-SPIDER_MODULES = ["OlimpicaWebscrapper.Structure.spiders"]
-NEWSPIDER_MODULE = "OlimpicaWebscrapper.Structure.spiders"
+SPIDER_MODULES = ["3m_webscrapper.Structure.spiders"]
+NEWSPIDER_MODULE = "3m_webscrapper.Structure.spiders"
 
 # Obedece robots.txt
 ROBOTSTXT_OBEY = False
@@ -12,18 +12,16 @@ ROBOTSTXT_OBEY = False
 DOWNLOAD_DELAY = 2
 RANDOMIZE_DOWNLOAD_DELAY = True
 
-# User-Agent (será sobrescrito por middleware)
-USER_AGENT = "OlimpicaWebscrapper (+http://www.you-website.com)"
 
 # # Habilitar middleware
 DOWNLOADER_MIDDLEWARES = {
-    "OlimpicaWebscrapper.Structure.middlewares.OlimpicaMiddleware": 400,
+    "3m_webscrapper.Structure.middlewares.MMM_Middleware": 400,
     "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
 }
 
 # Habilitar pipelines
 ITEM_PIPELINES = {
-    "OlimpicaWebscrapper.Structure.pipelines.OlimpicaProductPipeline": 300,
+    "3m_webscrapper.Structure.pipelines.MMM_ProductPipeline": 300,
 }
 
 # Logging

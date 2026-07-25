@@ -1,6 +1,5 @@
 import re
 import unicodedata
-import json
 import urllib.parse
 import scrapy
 
@@ -98,16 +97,10 @@ class ProductSpider(scrapy.Spider):
             list_price = None
             selling_price = None
             available = False
-            image_url = None
 
             items_list = prod.get("items") or []
             if items_list and isinstance(items_list, list):
                 first_sku = items_list[0]
-
-                # Extraemos la imagen del primer SKU disponible
-                images = first_sku.get("images") or []
-                if images and isinstance(images, list):
-                    image_url = images[0].get("imageUrl")
 
                 # Navegamos hacia la oferta comercial del vendedor principal (Sellers -> CommertialOffer)
                 sellers = first_sku.get("sellers") or []
@@ -126,8 +119,6 @@ class ProductSpider(scrapy.Spider):
             item["price"] = list_price
             item["sale_price"] = selling_price
             item["available"] = available
-
-            # item["image_url"] = image_url
 
             yield item
 
@@ -169,8 +160,6 @@ class ProductSpider(scrapy.Spider):
             path = f"/{slug}" if slug else ""
         else:
             return ""
-
-        # Limpieza de barras para evitar duplicaciones en el endpoint
         path = "/" + path.strip("/")
 
         return f"https://www.olimpica.com/api/catalog_system/pub/products/search{path}?{urllib.parse.urlencode({'_from': start_idx, '_to': start_idx + self.page_size - 1})}"

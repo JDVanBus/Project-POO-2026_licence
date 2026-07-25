@@ -1,22 +1,10 @@
 import json
 import re
-import sys
-from pathlib import Path
 from urllib.parse import urlencode, urljoin, urlparse, parse_qs
 
 import scrapy
 
-
-ROOT = Path(__file__).resolve().parents[1]
-
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-
-try:
-    from ..items import ProductItem
-except ImportError:
-    ("No se hallo el Archivo Items.py")
+from ..items import ProductItem
 
 
 class FalabellaProductSpider(scrapy.Spider):
@@ -47,15 +35,8 @@ class FalabellaProductSpider(scrapy.Spider):
 
         self.category_name = category_name or name
 
-        raw_paginas = None
-        if paginas_maximas is not None and str(paginas_maximas).strip() not in {
-            "",
-            "None",
-        }:
-            raw_paginas = paginas_maximas
-
         try:
-            self.paginas_maximas = int(raw_paginas) if raw_paginas is not None else 1
+            self.paginas_maximas = int(paginas_maximas)
         except (ValueError, TypeError):
             self.paginas_maximas = 1
 
@@ -77,7 +58,6 @@ class FalabellaProductSpider(scrapy.Spider):
             f"Procesando página {pagina_actual} de la categoría: {self.category_name}"
         )
 
-        # 1. Extracción de __NEXT_DATA__
         match = re.search(
             r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
             response.text,
@@ -93,7 +73,7 @@ class FalabellaProductSpider(scrapy.Spider):
         try:
             payload = json.loads(match.group(1))
         except json.JSONDecodeError:
-            self.logger.error("Error al decodificar __NEXT_DATA__")
+            self.logger.error(f"Error al decodificar los datos de {pagina_actual}")
             return
 
         productos_raw = self._find_products_grid(payload)
@@ -110,42 +90,27 @@ class FalabellaProductSpider(scrapy.Spider):
             item["source"] = "falabella.com.co"
             item["item_type"] = "product"
             item["category_name"] = self.category_name
-
-            # IDs y SKU de Falabella
             item["id"] = prod.get("productId") or prod.get("skuId") or prod.get("id")
-
-            # Datos básicos
             item["name"] = (
                 prod.get("displayName") or prod.get("title") or prod.get("name")
             )
             item["brand"] = prod.get("brand") or prod.get("brandName") or "Genérico"
-
-            # URL de destino
             raw_prod_url = prod.get("url") or prod.get("href") or ""
             item["url"] = (
                 urljoin("https://www.falabella.com.co", raw_prod_url.strip())
                 if raw_prod_url
                 else response.url
             )
-
-            # Imagen principal
-            item["image_url"] = prod.get("image") or prod.get("imageUrl") or ""
-
-            # Extracción limpia de precios de Falabella
-            # El objeto de precios suele variar (prices, price, etc.)
             precios = prod.get("prices") or prod.get("price") or []
             if isinstance(precios, list):
                 for p in precios:
                     tipo = str(p.get("type", "")).lower()
                     monto = p.get("originalAmount") or p.get("amount") or p.get("price")
-                    # 'referencia' suele ser el precio original sin descuento
                     if "referencia" in tipo or "normal" in tipo:
                         item["sale_price"] = monto
-                    # 'evento' o 'cmr' es el precio de venta final
                     elif "evento" in tipo or "cmr" in tipo or "internet" in tipo:
                         item["sale_price"] = monto
 
-            # Fallback de precio si no se mapeó correctamente en la lista
             if not item["sale_price"]:
                 item["sale_price"] = (
                     prod.get("price") or prod.get("highPrice") or prod.get("lowPrice")

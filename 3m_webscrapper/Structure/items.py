@@ -14,12 +14,6 @@ class BaseItem(scrapy.Item):
     url = scrapy.Field()
     raw_data = scrapy.Field()
 
-    def __init__(self, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-
-        self.setdefault("source", "olimpica.com")
-
 
 class CategoryItem(BaseItem):
     # Categoría
@@ -54,19 +48,3 @@ class ProductItem(BaseItem):
         super().__init__(*args, **kwargs)
 
         self.setdefault("item_type", "product")
-
-
-class PromotionItem(BaseItem):
-    # Promoción
-    promo_description = scrapy.Field()
-    discount_value = scrapy.Field()
-    discount_type = scrapy.Field()
-    promo_end_date = scrapy.Field()
-    product_ids = scrapy.Field()
-
-
-class TrendItem(BaseItem):
-    # Tendencia
-    trend_rank = scrapy.Field()  # posición en el ranking
-    trend_season = scrapy.Field()
-    trend_score = scrapy.Field()  # ventas o vistas

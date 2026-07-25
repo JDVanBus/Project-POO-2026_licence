@@ -48,7 +48,7 @@ class CategorySpider(scrapy.Spider):
             item["id"] = category.get("id")
             item["name"] = category.get("name")
             item["url"] = category.get("url")
-            # item["raw_data"] = category
+            # item["raw_data"] = category datos crudos, sin modificaciòn
             item["parent_id"] = parent.get("id") if parent else None
             item["parent_name"] = parent.get("name") if parent else None
             item["has_children"] = bool(category.get("children"))

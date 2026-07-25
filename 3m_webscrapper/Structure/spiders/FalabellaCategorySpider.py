@@ -1,19 +1,9 @@
 import json
 import re
-import sys
-from pathlib import Path
 
-import scrapy
 from scrapy.spiders import SitemapSpider
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-try:
-    from ..items import CategoryItem
-except Exception:
-    ("No se hallo el Archivo Items.py")
+from ..items import CategoryItem
 
 
 class FalabellaCategorySpider(SitemapSpider):
@@ -35,6 +25,7 @@ class FalabellaCategorySpider(SitemapSpider):
         self.processed_count = 0
 
     def parse_category(self, response):
+        breadcrumbs_list = []
         if self.max_categories and self.processed_count >= self.max_categories:
             return
         match = re.search(
@@ -43,15 +34,12 @@ class FalabellaCategorySpider(SitemapSpider):
             re.S,
         )
         if not match:
-            return
+            raise  # Error Personalizado
 
         try:
             payload = json.loads(match.group(1))
         except json.JSONDecodeError:
             return
-
-        # 3. Buscaremos los breadcrumbs reales de esta categoría en los metadatos de la página
-        breadcrumbs_list = []
 
         # Next.js suele guardar los breadcrumbs de la página activa en pageProps -> breadcrumbs
         try:
@@ -61,15 +49,11 @@ class FalabellaCategorySpider(SitemapSpider):
                 bc["name"].strip() for bc in breadcrumbs_data if bc.get("name")
             ]
         except (KeyError, TypeError):
-            # Alternativa por si la estructura cambia ligeramente en algunas categorías
-            pass
-
-        # Si Next.js falló, intentamos extraer los breadcrumbs directamente del HTML usando CSS
-        if not breadcrumbs_list:
-            breadcrumbs_list = response.css(
-                "ol.breadcrumbs-list li a::text, .breadcrumb li::text"
-            ).getall()
-            breadcrumbs_list = [b.strip() for b in breadcrumbs_list if b.strip()]
+            if not breadcrumbs_list:
+                breadcrumbs_list = response.css(
+                    "ol.breadcrumbs-list li a::text, .breadcrumb li::text"
+                ).getall()
+                breadcrumbs_list = [b.strip() for b in breadcrumbs_list if b.strip()]
 
         # Limpiamos elementos genéricos de la miga de pan como "Home" o "Inicio"
         if breadcrumbs_list and breadcrumbs_list[0].lower() in [
@@ -81,7 +65,6 @@ class FalabellaCategorySpider(SitemapSpider):
             breadcrumbs_list.pop(0)
 
         if not breadcrumbs_list:
-            # Si de verdad no tiene miga de pan, usamos el título de la página como categoría única
             titulo = response.css("h1::text").get()
             if titulo:
                 breadcrumbs_list = [titulo.strip()]
@@ -100,7 +83,6 @@ class FalabellaCategorySpider(SitemapSpider):
             parent_name = breadcrumbs_list[-2]  # El padre es el penúltimo elemento
             parent_id = parent_name.lower().replace(" ", "-")
 
-        # 5. Construcción del Item Limpio
         item = CategoryItem()
         item["source"] = "falabella.com.co"
         item["item_type"] = "category"
@@ -119,3 +101,15 @@ class FalabellaCategorySpider(SitemapSpider):
 
         self.processed_count += 1
         yield item
+
+    def sitemap_filter(self, entries):
+        count = 0
+        for entry in entries:
+            if self.max_categories and count >= self.max_categories:
+                self.logger.info(
+                    f"Limite de {self.max_categories} alcanzado, cerrando sitemap."
+                )
+                break
+            if "/category/" in entry.get("loc", ""):
+                count += 1
+            yield entry

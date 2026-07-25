@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OLIMPICA_CATEGORIES_FILE = ROOT / "Olimpica_categorias.json"
 FALABELLA_CATEGORIES_FILE = ROOT / "Falabella_categorias.json"
+LINIO_CATEGORIES_FILE = ROOT / "Linio_categorias.json"
 
 
 def sanitize_filename(value):
@@ -20,6 +21,8 @@ def load_category_url(category_id, source):
         categories_file = OLIMPICA_CATEGORIES_FILE
     elif source == "falabella":
         categories_file = FALABELLA_CATEGORIES_FILE
+    elif source == "linio":
+        categories_file = LINIO_CATEGORIES_FILE
     else:
         return None
 
@@ -140,7 +143,7 @@ def menu():
         max_cat = input(
             "Ingresa el número máximo de categorias a scapear: (sin limite por defecto): "
         ).strip()
-        kwargs = {"output": "linio_categorias.json"}
+        kwargs = {"output": "Linio_categorias.json"}
         if max_cat:
             kwargs["max_categories"] = max_cat
         run_scrapy("LinioCategorySpider", **kwargs)
@@ -150,6 +153,7 @@ def menu():
             "Ingresa el id de la categoría de Linio (ej: CATG33244): "
         ).strip()
         category_name = input("Ingresa el nombre de la categoría: ").strip()
+        category_url = load_category_url(category_id, source="linio")
         max_sections = (
             input(
                 "Ingresa el número máximo de páginas a scrapear (3 por defecto): "
@@ -160,10 +164,11 @@ def menu():
         kwargs = {
             "category_id": category_id,
             "category_name": category_name,
+            "category_url": category_url,
             "max_pages": max_sections,
             "output": output_name,
         }
-        # Ejecutamos pasando 'category_id' (en lugar de category_url) y 'output' (en lugar de output_name)
+        # Ejecutamos pasando 'category_id' (en lugar de category_url)
         run_scrapy("LinioProductSpider", **kwargs)
         print(f"Archivo guardado en: {output_name}")
 
@@ -215,6 +220,7 @@ def menu():
 
     else:
         print("Opción no válida")
+
 
 def main():
     flag = True
