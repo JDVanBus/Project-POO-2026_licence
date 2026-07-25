@@ -1,6 +1,5 @@
 import json
 import re
-import unicodedata
 import scrapy
 
 from ..items import ProductItem
@@ -14,6 +13,7 @@ class LinioProductSpider(scrapy.Spider):
         self,
         category_id=None,
         category_name=None,
+        category_url=None,
         max_pages=1,
         *args,
         **kwargs,
@@ -23,12 +23,8 @@ class LinioProductSpider(scrapy.Spider):
         """
         super().__init__(*args, **kwargs)
         self.category_id = category_id
-        self.category_name = category_name
-
-        try:
-            self.max_pages = int(max_pages)
-        except (TypeError, ValueError):
-            self.max_pages = 1
+        self.category_name = (category_name,)
+        self.max_pages = int(max_pages) or 1
 
         self.headers = {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
@@ -36,16 +32,12 @@ class LinioProductSpider(scrapy.Spider):
             "Cache-Control": "max-age=0",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
-
-        # Auto-construcción de la URL inicial usando la lógica de negocio
-        if self.category_id and self.category_name:
-            slug = self._slugify(self.category_name)
-            built_url = f"https://linio.falabella.com.co/linio-co/category/{self.category_id}/{slug}"
-            self.start_urls = [built_url]
+        if category_url:
+            self.start_urls = [category_url]
         else:
             self.start_urls = []
             self.logger.error(
-                "Se requiere 'category_id' y 'category_name' para inicializar el spider."
+                "Se requiere 'category_url' para inicializar el spider (verifica que exista en linio_categorias.json)."
             )
 
     def start_requests(self):
@@ -57,7 +49,7 @@ class LinioProductSpider(scrapy.Spider):
                 url=url,
                 headers=self.headers,
                 callback=self.parse,
-                meta={"page_number": 1},  # Ya no dependemos de "base_url" en meta
+                meta={"page_number": 1},
             )
 
     def parse(self, response):
@@ -84,7 +76,6 @@ class LinioProductSpider(scrapy.Spider):
         except json.JSONDecodeError:
             return
 
-        # Buscamos la lista de productos dentro del JSON de forma recursiva
         products_list = self._find_products_grid(payload)
 
         if not products_list:
@@ -166,13 +157,3 @@ class LinioProductSpider(scrapy.Spider):
                 if res:
                     return res
         return None
-
-    def _slugify(self, value):
-        """Convierte nombres como 'Celulares y Smartphones' en 'celulares-y-smartphones'"""
-        if not value:
-            return ""
-        normalized = unicodedata.normalize("NFKD", value)
-        ascii_value = normalized.encode("ascii", "ignore").decode("ascii")
-        ascii_value = ascii_value.lower()
-        ascii_value = re.sub(r"[^a-z0-9]+", "-", ascii_value).strip("-")
-        return ascii_value

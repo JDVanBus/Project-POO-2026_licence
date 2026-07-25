@@ -1,4 +1,4 @@
-class OlimpicaProductPipeline:
+class MMM_ProductPipeline:
     def open_spider(self, spider):
         self._items = []
 

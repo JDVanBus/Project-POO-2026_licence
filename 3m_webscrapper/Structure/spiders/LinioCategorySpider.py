@@ -2,10 +2,8 @@ import json
 import re
 import scrapy
 
-try:
-    from ..items import CategoryItem
-except ImportError:
-    ("No se hallo el Archivo Items.py")
+
+from ..items import CategoryItem
 
 
 class LinioCategorySpider(scrapy.Spider):
@@ -35,12 +33,16 @@ class LinioCategorySpider(scrapy.Spider):
         "CONCURRENT_REQUESTS": 8,
     }
 
+    def __init__(self, max_categories=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            self.max_categories = int(max_categories)
+        except (TypeError, ValueError):
+            self.max_categories = None
+
     def parse(self, response):
         # Si estamos en la página principal, buscamos todos los enlaces de categorías
-        if (
-            response.url == "https://linio.falabella.com.co/linio-co"
-            or response.url.endswith("/linio-co/")
-        ):
+        if response.url.strip("/").endswith("/linio-co"):
             self.logger.info(
                 "Página principal detectada. Extrayendo enlaces de categorías..."
             )
@@ -51,14 +53,16 @@ class LinioCategorySpider(scrapy.Spider):
 
             for link in links:
                 if "/category/" in link:
-                    # Normalizamos la URL para que sea absoluta
                     absolute_url = response.urljoin(link)
                     # Evitamos duplicados y URLs de paginación o filtros
                     if "?" not in absolute_url and "#" not in absolute_url:
                         category_urls.add(absolute_url)
+            category_urls = list(category_urls)
+            if self.max_categories:
+                category_urls = category_urls[: self.max_categories]
 
             self.logger.info(
-                f"Se descubrieron {len(category_urls)} URLs de categorías únicas en el menú."
+                f"Se descubrieron {len(category_urls)} categorías únicas (limite: {self.max_categories or 'sin limite'})."
             )
 
             # Enviamos cada una de las categorías descubiertas al método parse_category
@@ -100,17 +104,12 @@ class LinioCategorySpider(scrapy.Spider):
         try:
             # Buscamos los breadcrumbs en el payload de Next.js
             breadcrumbs_data = payload["props"]["pageProps"]["breadcrumbs"] or []
-            if not breadcrumbs_data:
-                breadcrumbs_data = (
-                    payload["props"]["pageProps"]["fallbackBreadcrumbs"] or []
-                )
             breadcrumbs_list = [
                 bc["name"].strip() for bc in breadcrumbs_data if bc.get("name")
             ]
         except (KeyError, TypeError):
             pass
 
-        # Fallback CSS si no viene en el JSON
         if not breadcrumbs_list:
             breadcrumbs_list = response.css(
                 "ol.breadcrumbs_list li a::text, .breadcrumbs li::text"
@@ -139,19 +138,16 @@ class LinioCategorySpider(scrapy.Spider):
 
         name = breadcrumbs_list[-1]
         level = len(breadcrumbs_list) - 1
-
         parent_name = None
         parent_id = None
-        if len(breadcrumbs_list) > 1:
+        if level > 1:
             parent_name = breadcrumbs_list[-2]
             parent_id = parent_name.lower().replace(" ", "-")
 
-        # Construcción del Item
         item = CategoryItem()
         item["source"] = "linio.falabella.com.co"
         item["item_type"] = "category"
         try:
-            # Extrae el ID real de la URL (ej: CATG33244)
             item["id"] = response.url.strip("/").split("/")[-2]
         except Exception:
             item["id"] = None
