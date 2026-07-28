@@ -134,7 +134,7 @@ def menu():
             "category_url": category_url,
             "category_name": category_name,
             "output": output_name,
-            "paginas_maximas": max_sections,
+            "max_size": max_sections,
         }
         run_scrapy("FalabellaProductSpider", **kwargs)
         print(f"Archivo guardado en: {output_name}")
@@ -165,7 +165,7 @@ def menu():
             "category_id": category_id,
             "category_name": category_name,
             "category_url": category_url,
-            "max_pages": max_sections,
+            "max_size": max_sections,
             "output": output_name,
         }
         # Ejecutamos pasando 'category_id' (en lugar de category_url)

@@ -31,11 +31,6 @@ class ProductSpider(scrapy.Spider):
         except (TypeError, ValueError):
             self.max_sections = 5
 
-        self.headers = {
-            "Accept": "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        }
-
         # Generamos la URL de la API inicial
         if self.category_id or self.category_url or self.category_name:
             self.start_urls = [self._build_category_api_url(0)]
@@ -56,7 +51,6 @@ class ProductSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(
                 url=url,
-                headers=self.headers,
                 callback=self.parse,
                 cb_kwargs={"start_idx": 0, "section_number": 0},
                 dont_filter=True,
@@ -134,7 +128,6 @@ class ProductSpider(scrapy.Spider):
                 )
                 yield scrapy.Request(
                     url=next_url,
-                    headers=self.headers,
                     callback=self.parse,
                     cb_kwargs={
                         "start_idx": next_start,

@@ -13,9 +13,7 @@ class FalabellaProductSpider(scrapy.Spider):
 
     def __init__(
         self,
-        url=None,
-        name=None,
-        paginas_maximas=None,
+        max_size=None,
         category_url=None,
         category_name=None,
         *args,
@@ -23,7 +21,7 @@ class FalabellaProductSpider(scrapy.Spider):
     ):
         super().__init__(*args, **kwargs)
 
-        raw_url = url or category_url
+        raw_url = category_url
         if isinstance(raw_url, (list, tuple)):
             self.start_urls = [
                 str(item).strip() for item in raw_url if str(item).strip()
@@ -33,12 +31,12 @@ class FalabellaProductSpider(scrapy.Spider):
             self.start_url = str(raw_url).strip() if raw_url else None
             self.start_urls = [self.start_url] if self.start_url else []
 
-        self.category_name = category_name or name
+        self.category_name = category_name
 
         try:
-            self.paginas_maximas = int(paginas_maximas)
+            self.max_size = int(max_size)
         except (ValueError, TypeError):
-            self.paginas_maximas = 1
+            self.max_size = 1
 
     def start_requests(self):
         if not self.start_urls:
@@ -115,11 +113,12 @@ class FalabellaProductSpider(scrapy.Spider):
                 item["sale_price"] = (
                     prod.get("price") or prod.get("highPrice") or prod.get("lowPrice")
                 )
-
+            else:
+                item["sale_price"] = None
             yield item
 
         # 4. Control de paginación recursiva mediante la lógica de Olímpica
-        if pagina_actual < self.paginas_maximas:
+        if pagina_actual < self.max_size:
             siguiente_pagina = pagina_actual + 1
             nueva_url = self._build_page_url(response.url, siguiente_pagina)
 

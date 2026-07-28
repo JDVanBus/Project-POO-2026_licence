@@ -22,11 +22,12 @@ class FalabellaCategorySpider(SitemapSpider):
             self.max_categories = int(max_categories) if max_categories else None
         except (TypeError, ValueError):
             self.max_categories = None
-        self.processed_count = 0
 
     def parse_category(self, response):
+        self.logger.info(f"Procesando categoría: {response.url}")
+        processed_count = 0
         breadcrumbs_list = []
-        if self.max_categories and self.processed_count >= self.max_categories:
+        if self.max_categories and processed_count >= self.max_categories:
             return
         match = re.search(
             r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
@@ -99,7 +100,7 @@ class FalabellaCategorySpider(SitemapSpider):
         item["level"] = level
         item["breadcrumbs"] = breadcrumbs_list
 
-        self.processed_count += 1
+        processed_count += 1
         yield item
 
     def sitemap_filter(self, entries):
