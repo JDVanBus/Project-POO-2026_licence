@@ -1,0 +1,31 @@
+# Carpetas
+__pycache__/
+.pytest_cache/
+__pycache__/
+node_modules/
+.venv/
+venv/
+dist/
+build/
+
+# Archivos
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.env
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Específico del proyecto
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+*.json
