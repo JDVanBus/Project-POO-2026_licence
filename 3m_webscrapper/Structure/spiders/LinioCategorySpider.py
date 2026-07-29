@@ -88,7 +88,7 @@ class LinioCategorySpider(scrapy.Spider):
                 bc["name"].strip() for bc in breadcrumbs_data if bc.get("name")
             ]
         except (KeyError, TypeError):
-            pass
+            breadcrumbs_list = []
 
         if not breadcrumbs_list:
             breadcrumbs_list = response.css(
@@ -129,7 +129,7 @@ class LinioCategorySpider(scrapy.Spider):
         item["item_type"] = "category"
         try:
             item["id"] = response.url.strip("/").split("/")[-2]
-        except Exception:
+        except IndexError:
             item["id"] = None
 
         item["name"] = name

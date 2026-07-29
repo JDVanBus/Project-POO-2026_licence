@@ -2,7 +2,7 @@ import json
 import re
 
 from scrapy.spiders import SitemapSpider
-
+from ..excepts import ParseError
 from ..items import CategoryItem
 
 
@@ -35,12 +35,14 @@ class FalabellaCategorySpider(SitemapSpider):
             re.S,
         )
         if not match:
-            raise  # Error Personalizado
+            raise ParseError(
+                "Archivo de categorias guardado por el bloque no encontrado"
+            )
 
         try:
             payload = json.loads(match.group(1))
-        except json.JSONDecodeError:
-            return
+        except json.JSONDecodeError as e:
+            return f"error intentando leer el json : {e}"
 
         # Next.js suele guardar los breadcrumbs de la página activa en pageProps -> breadcrumbs
         try:
