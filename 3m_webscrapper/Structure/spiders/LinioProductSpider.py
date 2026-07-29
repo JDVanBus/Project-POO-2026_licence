@@ -14,7 +14,7 @@ class LinioProductSpider(scrapy.Spider):
         category_id=None,
         category_name=None,
         category_url=None,
-        max_pages=1,
+        max_size=1,
         *args,
         **kwargs,
     ):
@@ -23,15 +23,9 @@ class LinioProductSpider(scrapy.Spider):
         """
         super().__init__(*args, **kwargs)
         self.category_id = category_id
-        self.category_name = (category_name,)
-        self.max_pages = int(max_pages) or 1
+        self.category_name = category_name
+        self.max_size = int(max_size) or 1
 
-        self.headers = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-            "Accept-Language": "es-ES,es;q=0.9",
-            "Cache-Control": "max-age=0",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        }
         if category_url:
             self.start_urls = [category_url]
         else:
@@ -47,7 +41,6 @@ class LinioProductSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(
                 url=url,
-                headers=self.headers,
                 callback=self.parse,
                 meta={"page_number": 1},
             )
@@ -121,7 +114,7 @@ class LinioProductSpider(scrapy.Spider):
             yield item
 
         # Paginación consecutiva automática (Inmune a redirecciones)
-        if page_number < self.max_pages:
+        if page_number < self.max_size:
             next_page = page_number + 1
 
             # Limpiamos cualquier parámetro '?page=' previo de la URL de respuesta actual
@@ -131,7 +124,6 @@ class LinioProductSpider(scrapy.Spider):
             self.logger.info(f"Navegando a la siguiente página: {next_url}")
             yield scrapy.Request(
                 url=next_url,
-                headers=self.headers,
                 callback=self.parse,
                 meta={"page_number": next_page},
             )

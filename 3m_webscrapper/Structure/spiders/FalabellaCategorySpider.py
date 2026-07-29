@@ -2,7 +2,7 @@ import json
 import re
 
 from scrapy.spiders import SitemapSpider
-
+from ..excepts import ParseError
 from ..items import CategoryItem
 
 
@@ -22,11 +22,12 @@ class FalabellaCategorySpider(SitemapSpider):
             self.max_categories = int(max_categories) if max_categories else None
         except (TypeError, ValueError):
             self.max_categories = None
-        self.processed_count = 0
 
     def parse_category(self, response):
+        self.logger.info(f"Procesando categoría: {response.url}")
+        processed_count = 0
         breadcrumbs_list = []
-        if self.max_categories and self.processed_count >= self.max_categories:
+        if self.max_categories and processed_count >= self.max_categories:
             return
         match = re.search(
             r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
@@ -34,12 +35,14 @@ class FalabellaCategorySpider(SitemapSpider):
             re.S,
         )
         if not match:
-            raise  # Error Personalizado
+            raise ParseError(
+                "Archivo de categorias guardado por el bloque no encontrado"
+            )
 
         try:
             payload = json.loads(match.group(1))
-        except json.JSONDecodeError:
-            return
+        except json.JSONDecodeError as e:
+            return f"error intentando leer el json : {e}"
 
         # Next.js suele guardar los breadcrumbs de la página activa en pageProps -> breadcrumbs
         try:
@@ -99,7 +102,7 @@ class FalabellaCategorySpider(SitemapSpider):
         item["level"] = level
         item["breadcrumbs"] = breadcrumbs_list
 
-        self.processed_count += 1
+        processed_count += 1
         yield item
 
     def sitemap_filter(self, entries):

@@ -35,7 +35,6 @@ class ProductItem(BaseItem):
     # Producto
     price = scrapy.Field()
     sale_price = scrapy.Field()  # precio con descuento (antes old_price)
-    image_url = scrapy.Field()
     brand = scrapy.Field()
     category_id = scrapy.Field()
     category_name = scrapy.Field()
